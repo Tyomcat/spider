@@ -1,7 +1,10 @@
+#! /usr/bin/python3
+# -*- coding:utf8 -*-
+# __author__ = 'tyomcat'
+
 import time
 import re
 from datetime import timedelta
-
 
 global static_urls
 static_urls = []
@@ -13,7 +16,8 @@ except ImportError:
     from html.parser import HTMLParser
     from urllib.parse import urljoin, urldefrag
 from tornado import httpclient, gen, ioloop, queues
-base_url = 'http://127.0.0.1:65412'
+
+base_url = 'http://127.0.0.1:65412'   # 要爬取的url
 concurrency = 10
 @gen.coroutine
 def get_links_from_url(url):
@@ -95,7 +99,7 @@ def static_url(urls):
     params = []
     line_date = []
     links = []
-    for i in urls:
+    for i in urls:    # 匹配日期 2017-03-23 或 2017/03/12 ，替换为{int}，避免干扰
         if re.search('.(html|shtml)', i):
             if re.search(r"\d{4}\/\d{1,2}\/\d{1,2}|\d{4}-\d{1,2}-\d{1,2}", i):
                 m = re.sub("\d{4}\/\d{1,2}\/\d{1,2}|\d{4}-\d{1,2}-\d{1,2}", '{int}', i)
@@ -103,7 +107,7 @@ def static_url(urls):
                     continue
                 else:
                     line_date.append(m)
-            elif re.match(r'\d+', i):
+            elif re.match(r'\d+', i):  # 默认url中数字出现次数相同的，去重
                 n = re.findall(r'\d+', i)
                 if len(n) in params:
                     continue
@@ -111,11 +115,11 @@ def static_url(urls):
                     params.append(len(n))
 
             links.append(i)
-
+        # 去重伪静态URL如： http://www.hehe.com/name/34345
         else:
             line = i.split('/')[3:]
             if len(line) > 0:
-                line.pop()
+                line.pop()  # 一次pop 比较 除倒数第一个参数外，其余参数是否相同，以 / 分割
                 key = set(line)
                 if key <= param1:
                     continue
